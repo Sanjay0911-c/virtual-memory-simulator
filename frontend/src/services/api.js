@@ -51,3 +51,7 @@ export function compare(pages, frames) {
 export function analyzeFrames(pages, minFrames, maxFrames) {
   return postJSON('/frame-analysis', { pages, min_frames: minFrames, max_frames: maxFrames })
 }
+
+export function generateWorkload(params) {
+  return postJSON('/workload', params)
+}

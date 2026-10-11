@@ -25,6 +25,7 @@ from fastapi.responses import JSONResponse
 from app.api.compare import router as compare_router
 from app.api.frame_analysis import router as frame_analysis_router
 from app.api.simulate import router as simulate_router
+from app.api.workload import router as workload_router
 from app.models.envelope import error_response
 from app.services.validation import APIError
 
@@ -33,6 +34,7 @@ app = FastAPI(title="Virtual Memory Simulator & Page Replacement Analysis API")
 app.include_router(simulate_router)
 app.include_router(compare_router)
 app.include_router(frame_analysis_router)
+app.include_router(workload_router)
 
 
 @app.exception_handler(APIError)

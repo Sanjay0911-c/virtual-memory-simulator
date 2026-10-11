@@ -14,7 +14,7 @@ specific error codes (INVALID_FRAME_COUNT, INVALID_REFERENCE_STRING,
 INVALID_ALGORITHM) the project spec calls for.
 """
 
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel
 
@@ -34,3 +34,18 @@ class FrameAnalysisRequest(BaseModel):
     pages: List[int]
     min_frames: int
     max_frames: int
+
+
+class WorkloadRequest(BaseModel):
+    """Parameters for POST /api/workload. `type`, `length` and `page_range`
+    are always required; the optional fields apply to specific workload
+    types (see services/workload_service.py) and fall back to documented
+    defaults when omitted."""
+
+    type: str
+    length: int
+    page_range: int
+    seed: Optional[int] = None
+    pattern_length: Optional[int] = None
+    working_set_size: Optional[int] = None
+    locality_probability: Optional[float] = None

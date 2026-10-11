@@ -436,3 +436,24 @@ select:focus {
   align-items: center;
   gap: 6px;
 }
+
+/* ---- Workload generator ---- */
+.status-warning {
+  background: #fffbeb;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+
+.status-success {
+  background: var(--success-bg);
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.status p {
+  margin: 0 0 8px;
+}
+
+.panel > .status {
+  margin-bottom: 12px;
+}

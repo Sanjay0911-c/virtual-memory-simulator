@@ -6,6 +6,7 @@ import SimulationTable from './components/SimulationTable.jsx'
 import CompareSection from './components/CompareSection.jsx'
 import FrameAnalysisPanel from './components/FrameAnalysisPanel.jsx'
 import FrameAnalysisResults from './components/FrameAnalysisResults.jsx'
+import WorkloadGenerator from './components/WorkloadGenerator.jsx'
 import { simulate, compare, analyzeFrames } from './services/api.js'
 import { parseReferenceString } from './services/parseInput.js'
 
@@ -216,6 +217,13 @@ export default function App() {
           onCompare={handleCompare}
           onReset={handleReset}
           loading={loading}
+        />
+
+        {/* Fills the reference-string box above; never runs a simulation itself. */}
+        <WorkloadGenerator
+          referenceInput={referenceInput}
+          onGenerated={setReferenceInput}
+          disabled={loading}
         />
 
         {loading && (

@@ -15,6 +15,8 @@ from typing import List
 MAX_REFERENCE_LENGTH = 1000
 MAX_FRAME_RANGE_SPAN = 50  # guard against an absurdly wide frame-count sweep
 VALID_ALGORITHMS = {"FIFO", "LRU", "OPTIMAL"}
+VALID_WORKLOAD_TYPES = {"sequential", "random", "repeated", "locality"}
+MAX_SEED = 2**32 - 1
 
 
 class APIError(Exception):
@@ -89,3 +91,67 @@ def validate_algorithm(algorithm: str) -> str:
             f"Algorithm must be one of {sorted(VALID_ALGORITHMS)}",
         )
     return algorithm.upper()
+
+
+def _is_int(value) -> bool:
+    return isinstance(value, int) and not isinstance(value, bool)
+
+
+def validate_workload_params(
+    workload_type: str,
+    length: int,
+    page_range: int,
+    seed=None,
+    pattern_length=None,
+    working_set_size=None,
+    locality_probability=None,
+) -> str:
+    """Validates a workload-generation request and returns the normalized
+    (lowercase) workload type. The generated length is held to the SAME
+    limit as a manually entered reference string (MAX_REFERENCE_LENGTH);
+    the generated pages themselves are also re-checked with validate_pages
+    by the workload service."""
+    if not isinstance(workload_type, str) or workload_type.lower() not in VALID_WORKLOAD_TYPES:
+        raise APIError(
+            "INVALID_WORKLOAD",
+            f"Workload type must be one of {sorted(VALID_WORKLOAD_TYPES)}",
+        )
+
+    if not _is_int(length) or length <= 0:
+        raise APIError("INVALID_WORKLOAD", "Length must be a positive integer")
+    if length > MAX_REFERENCE_LENGTH:
+        raise APIError(
+            "INVALID_WORKLOAD",
+            f"Length is too long (max {MAX_REFERENCE_LENGTH} page requests)",
+        )
+
+    if not _is_int(page_range) or page_range <= 0:
+        raise APIError("INVALID_WORKLOAD", "Page range must be a positive integer")
+
+    if seed is not None and (not _is_int(seed) or seed < 0 or seed > MAX_SEED):
+        raise APIError("INVALID_WORKLOAD", f"Seed must be an integer between 0 and {MAX_SEED}")
+
+    if pattern_length is not None and (
+        not _is_int(pattern_length) or pattern_length <= 0 or pattern_length > page_range
+    ):
+        raise APIError(
+            "INVALID_WORKLOAD",
+            "Pattern length must be a positive integer no larger than the page range",
+        )
+
+    if working_set_size is not None and (
+        not _is_int(working_set_size) or working_set_size <= 0 or working_set_size > page_range
+    ):
+        raise APIError(
+            "INVALID_WORKLOAD",
+            "Working set size must be a positive integer no larger than the page range",
+        )
+
+    if locality_probability is not None and (
+        isinstance(locality_probability, bool)
+        or not isinstance(locality_probability, (int, float))
+        or not 0 <= locality_probability <= 1
+    ):
+        raise APIError("INVALID_WORKLOAD", "Locality probability must be between 0 and 1")
+
+    return workload_type.lower()
