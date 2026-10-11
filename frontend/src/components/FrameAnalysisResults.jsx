@@ -1,3 +1,5 @@
+import FrameAnalysisChart from './FrameAnalysisChart.jsx'
+
 /**
  * Purely a renderer for what /api/frame-analysis already returned — no
  * fault-counting or anomaly-detection logic lives here. The backend's
@@ -15,6 +17,8 @@ export default function FrameAnalysisResults({ analysis }) {
         Reference string: {analysis.reference_string.join(', ')} &nbsp;|&nbsp; Frames{' '}
         {analysis.min_frames}–{analysis.max_frames}
       </p>
+
+      <FrameAnalysisChart analysis={analysis} />
 
       <div className="table-scroll">
         <table className="sim-table">
