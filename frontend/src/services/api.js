@@ -40,8 +40,10 @@ async function postJSON(path, body) {
   return payload.data
 }
 
-export function simulate(pages, frames, algorithm) {
-  return postJSON('/simulate', { pages, frames, algorithm })
+export function simulate(pages, frames, algorithm, explain = false) {
+  // `explain` is opt-in; when false the body is exactly what it was before.
+  const body = explain ? { pages, frames, algorithm, explain: true } : { pages, frames, algorithm }
+  return postJSON('/simulate', body)
 }
 
 export function compare(pages, frames) {

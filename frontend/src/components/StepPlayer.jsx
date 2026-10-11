@@ -73,6 +73,8 @@ export default function StepPlayer({
         })}
       </div>
 
+      <StepExplanation step={current} />
+
       <div className="button-row">
         <button
           className="btn btn-ghost"
@@ -104,5 +106,85 @@ export default function StepPlayer({
         </button>
       </div>
     </section>
+  )
+}
+
+/**
+ * Shows WHY the current step happened. For an eviction it displays the
+ * backend's own `decision` block (victim, per-page evidence, reason text) —
+ * nothing is recomputed here. Hits and placements into an empty frame have
+ * no victim, so they get a fixed message based on fields already in the step.
+ */
+function StepExplanation({ step }) {
+  if (step.result === 'HIT') {
+    return (
+      <div className="decision-box decision-neutral" data-testid="step-explanation">
+        <strong>No replacement.</strong> Page {step.page} is already in memory, so this is a hit and
+        no victim was chosen.
+      </div>
+    )
+  }
+
+  if (step.replaced_page === null) {
+    return (
+      <div className="decision-box decision-neutral" data-testid="step-explanation">
+        <strong>No replacement.</strong> Page {step.page} faulted, but a frame was still empty, so
+        it was loaded there and no victim was chosen.
+      </div>
+    )
+  }
+
+  const decision = step.decision
+  if (!decision) {
+    return (
+      <div className="decision-box decision-neutral" data-testid="step-explanation">
+        Page {step.replaced_page} was replaced. No decision details were provided for this run.
+      </div>
+    )
+  }
+
+  const evidenceHeader =
+    decision.policy === 'FIFO'
+      ? 'Loaded at step'
+      : decision.policy === 'LRU'
+        ? 'Last used at step'
+        : 'Next used at step'
+
+  function evidenceValue(candidate) {
+    if (decision.policy === 'FIFO') return candidate.loaded_at
+    if (decision.policy === 'LRU') return candidate.last_used
+    return candidate.next_use === null ? 'never again' : candidate.next_use
+  }
+
+  return (
+    <div className="decision-box" data-testid="step-explanation">
+      <div className="decision-title">
+        Why page <strong>{decision.victim}</strong> was replaced
+        {decision.tie_broken && <span className="badge badge-fault"> tie broken by frame order</span>}
+      </div>
+      <p className="decision-reason" data-testid="decision-reason">
+        {decision.reason}
+      </p>
+      <div className="table-scroll">
+        <table className="sim-table decision-table">
+          <thead>
+            <tr>
+              <th>Resident page</th>
+              <th>{evidenceHeader}</th>
+              <th />
+            </tr>
+          </thead>
+          <tbody>
+            {decision.candidates.map((c) => (
+              <tr key={c.page} className={c.page === decision.victim ? 'row-fault' : undefined}>
+                <td>{c.page}</td>
+                <td>{evidenceValue(c)}</td>
+                <td>{c.page === decision.victim ? 'Victim' : ''}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
   )
 }

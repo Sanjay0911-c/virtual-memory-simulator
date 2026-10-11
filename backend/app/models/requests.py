@@ -23,6 +23,8 @@ class SimulateRequest(BaseModel):
     pages: List[int]
     frames: int
     algorithm: str
+    # Opt-in: when true, replacement steps include a "decision" block.
+    explain: bool = False
 
 
 class CompareRequest(BaseModel):

@@ -32,13 +32,16 @@ ALGORITHM_FUNCS = {
 }
 
 
-def run_simulation(pages: List[int], frames: int, algorithm: str) -> Dict:
-    """Validate input, run ONE algorithm, and return its full result block."""
+def run_simulation(pages: List[int], frames: int, algorithm: str, explain: bool = False) -> Dict:
+    """Validate input, run ONE algorithm, and return its full result block.
+
+    With explain=True, steps that evict a page also carry a "decision"
+    block produced by the algorithm itself. Default output is unchanged."""
     validate_pages(pages)
     validate_frames(frames)
     algo_name = validate_algorithm(algorithm)
 
-    steps = ALGORITHM_FUNCS[algo_name](pages, frames)
+    steps = ALGORITHM_FUNCS[algo_name](pages, frames, explain=explain)
     return _build_result(algo_name, steps)
 
 

@@ -81,7 +81,7 @@ export default function App() {
     setCompareResult(null)
     setFrameAnalysis(null)
     try {
-      const data = await simulate(parsed.pages, parsed.frames, algorithm)
+      const data = await simulate(parsed.pages, parsed.frames, algorithm, true)
       setResult(data)
       setCurrentStepIndex(0)
       setIsPlaying(false)

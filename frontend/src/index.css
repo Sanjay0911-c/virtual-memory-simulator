@@ -457,3 +457,34 @@ select:focus {
 .panel > .status {
   margin-bottom: 12px;
 }
+
+/* ---- Replacement decision explanation (Step Player) ---- */
+.decision-box {
+  margin: 14px 0;
+  padding: 12px 16px;
+  border: 1px solid #fecaca;
+  border-left: 4px solid var(--danger);
+  background: #fff7f7;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.decision-neutral {
+  border-color: var(--border);
+  border-left-color: var(--text-muted);
+  background: #f8fafc;
+  color: var(--secondary);
+}
+
+.decision-title {
+  margin-bottom: 6px;
+}
+
+.decision-reason {
+  margin: 0 0 10px;
+  line-height: 1.45;
+}
+
+.decision-table {
+  max-width: 420px;
+}

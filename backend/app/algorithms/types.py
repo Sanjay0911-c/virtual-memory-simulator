@@ -19,3 +19,6 @@ class Step(TypedDict):
     frames: List[Optional[int]]
     result: str
     replaced_page: Optional[int]
+    # NOTE: with explain=True, replacement steps also carry an extra
+    # "decision" dict (see simulate_*). It is deliberately absent from this
+    # type: it is opt-in, and the default step shape must stay as above.

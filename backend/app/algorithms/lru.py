@@ -17,11 +17,15 @@ from typing import List, Optional
 from app.algorithms.types import Step
 
 
-def simulate_lru(pages: List[int], frame_count: int) -> List[Step]:
+def simulate_lru(pages: List[int], frame_count: int, explain: bool = False) -> List[Step]:
     """Run LRU page replacement over `pages` with `frame_count` frames.
 
     Frame slots are stable positions, same convention as FIFO: a newly
     loaded page takes the slot of the page it replaced.
+
+    If `explain` is True, every step that evicts a page also carries a
+    "decision" dict built from the same `last_used` data the victim was
+    chosen from. The default (False) leaves the step records unchanged.
 
     Raises:
         ValueError: if frame_count is not a positive integer.
@@ -35,6 +39,7 @@ def simulate_lru(pages: List[int], frame_count: int) -> List[Step]:
 
     for i, page in enumerate(pages, start=1):
         replaced_page: Optional[int] = None
+        decision: Optional[dict] = None
 
         if page in frame_slots:
             result = "HIT"
@@ -45,25 +50,44 @@ def simulate_lru(pages: List[int], frame_count: int) -> List[Step]:
                 frame_slots[slot] = page
             else:
                 # Victim = resident page with the smallest (oldest) last-used step.
-                victim_page = min(
-                    (p for p in frame_slots if p is not None),
-                    key=lambda p: last_used[p],
-                )
+                resident = [p for p in frame_slots if p is not None]
+                victim_page = min(resident, key=lambda p: last_used[p])
                 slot = frame_slots.index(victim_page)
                 replaced_page = victim_page
+                if explain:
+                    decision = _lru_decision(victim_page, page, resident, last_used)
                 frame_slots[slot] = page
                 del last_used[victim_page]
 
         last_used[page] = i
 
-        steps.append(
-            {
-                "step": i,
-                "page": page,
-                "frames": frame_slots.copy(),
-                "result": result,
-                "replaced_page": replaced_page,
-            }
-        )
+        step = {
+            "step": i,
+            "page": page,
+            "frames": frame_slots.copy(),
+            "result": result,
+            "replaced_page": replaced_page,
+        }
+        if decision is not None:
+            step["decision"] = decision
+        steps.append(step)
 
     return steps
+
+
+def _lru_decision(victim: int, incoming: int, resident: List[int], last_used: dict) -> dict:
+    """Evidence for one LRU eviction. `resident` (in frame-slot order) and
+    `last_used` are the exact inputs the victim was selected from; the
+    victim passed in is the result of that selection."""
+    candidates = [{"page": p, "last_used": last_used[p]} for p in resident]
+    usage = ", ".join(f"{c['page']} (step {c['last_used']})" for c in candidates)
+    return {
+        "policy": "LRU",
+        "victim": victim,
+        "candidates": candidates,
+        "reason": (
+            f"Page {incoming} faulted and every frame was full. LRU evicts the page unused for "
+            f"the longest time: page {victim} was last used at step {last_used[victim]}, the "
+            f"oldest of the resident pages. Last use of each resident page: {usage}."
+        ),
+    }

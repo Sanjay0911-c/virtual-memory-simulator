@@ -21,5 +21,5 @@ router = APIRouter()
 
 @router.post("/api/simulate")
 def simulate(payload: SimulateRequest):
-    result = run_simulation(payload.pages, payload.frames, payload.algorithm)
+    result = run_simulation(payload.pages, payload.frames, payload.algorithm, payload.explain)
     return success_response(result)
